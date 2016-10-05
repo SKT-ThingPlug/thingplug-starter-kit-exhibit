@@ -22,6 +22,7 @@ jQuery(document).ready(function() {
 	var data_humid = [0];			// 웹페이지에 출력되는 습도값
 	var data_temp = [0];			// 웹페이지에 출력되는 온도값
 	var data_lux = [0];				// 웹페이지에 출력되는 조도값
+	var data_distance = [0];		// 웹페이지에 출력되는 거리값
 	var Data_Firm = [0];			// 웹페이지에 출력되는 가상의 Firmware Version
 	var Data_NodeID = [0];			// 웹페이지에 출력되는 LTID
 	
@@ -61,14 +62,11 @@ jQuery(document).ready(function() {
 		text: 'test for image',
 
 	};
+		
+	var distance_threshold = 30;	//거리 기준값
+	var temp_threshold = 30;		//온도 기준값
+	var bright_threshold = 150;		//밝기 기준값
 	
-	
-	// var img_address1 = "https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-lora-starter-kit/master/media/image";
-	// var img_address2 = 1;
-	// var img_address3 = ".png";
-	
-	var distance_threshold = 30;			//거리 기준값
-	var temp_thresold = 30;			//온도 기준값
 	var tmp_img = "";				//이미지 임시값
 	var img_address = "capture/";
 	
@@ -98,17 +96,17 @@ jQuery(document).ready(function() {
 		height : document.getElementById("graph_temp").clientHeight
 
 	};
-
+	
 	///////////////////////////////////////////////////
-	var color_humid = d3.scale.category10();
-	color_humid.domain(['Sensor_humid']);
-	var humid_obj = {
-		id : 'humid',
-		_color : color_humid,
-		_series : color_humid.domain().map(function(name){
+	var color_distance = d3.scale.category10();
+	color_distance.domain(['Sensor_distance']);
+	var distance_obj = {
+		id : 'distance',
+		_color : color_distance,
+		_series : color_distance.domain().map(function(name){
 			return {
-				name : 'Sensor_humid',
-				values : data_humid
+				name : 'Sensor_distance',
+				values : data_distance
 			};
 		}),
 		_x : null,
@@ -119,8 +117,8 @@ jQuery(document).ready(function() {
 		_yAxis : null,
 		_ld : null,
 		_path : null,
-		width : document.getElementById("graph_humid").clientWidth,
-		height : document.getElementById("graph_humid").clientHeight
+		width : document.getElementById("graph_distance").clientWidth,
+		height : document.getElementById("graph_distance").clientHeight
 		
 	};
 	///////////////////////////////////////////////////
@@ -148,7 +146,6 @@ jQuery(document).ready(function() {
 
 		
 	};
-
 	/* end of graph Related Variables */
 //=============================================================================================================================//
 
@@ -197,20 +194,6 @@ jQuery(document).ready(function() {
 		
 	}
 	
-	function sendsms(cb) {
-		var url = '/sms';
-
-		$.post(url, smsOptions, function(data,status){
-			if(status == 'success'){
-				cb(null, smsOptions);
-			}
-			else {
-				console.log('[Error] /config API return status :'+status);
-				cb({error: status}, null);
-			}
-		});
-		
-	}
 //=============================================================================================================================//
 
 
@@ -366,7 +349,7 @@ jQuery(document).ready(function() {
 	}
 	
 	creategraph(temp_obj);
-	creategraph(humid_obj);
+	creategraph(distance_obj);
 	creategraph(lux_obj);
 //=============================================================================================================================//
 
@@ -509,7 +492,7 @@ function getPhoto(cb) {
 			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
-			///////////////////////Distance 확인///////////////////////////////////////
+			////////////////Distance, Bright, Temp 확인////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
@@ -517,12 +500,25 @@ function getPhoto(cb) {
 			var valueDistance = data_prim.substring(53,56);//어느부분인지 확인해야함
 			valueDistance = parseInt(valueDistance, 16);
 			//alert(valueDistance);
-			// if(valueDistance < distance_threshold && tmp_img != img_address){
-				// img_address = tmp_img;
-				// $.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
-					// toastr.warning('Take Photo');
-				// });
-			// }
+			
+			if(valueDistance < distance_threshold && tmp_img != img_address){
+				img_address = tmp_img;
+				$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
+					toastr.warning('Take Photo');
+				});
+			}
+			
+			if(valueLux < bright_threshold ){
+				$.post('/control', {cmt:'LEDControl',cmd:'G0'}, function(data,status){
+					toastr.success('Turn On Lights');
+				});
+			}
+			
+			if(valueTemp > temp_threshold ){
+				$.post('/control', {cmt:'LEDControl',cmd:'R0'}, function(data,status){
+					toastr.error('Emergency');
+				});
+			}
 						
 			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
@@ -532,60 +528,28 @@ function getPhoto(cb) {
 			///////////////////////////////////////////////////////////////////////////
 			
 			insertData(data_temp,valueTemp, '#temp_value');
-			insertData(data_humid,valueDistance, '#humid_value');
+			insertData(data_distance,valueDistance, '#distance_value');
 			insertData(data_lux,valueLux, '#lux_value');
 
 		});
 		
-		insertData(Data_Firm,Firm_Ver[nodeIndex], '#FirmVer_value');
 		insertData(Data_NodeID,nodeID[nodeIndex], '#NodeID');
 		
 		//document.getElementById("data_img").src = img_address;
 		//$("#data_img").attr("src", "file://"+tmp_img);
 		
-		alert(tmp_img);
-		document.getElementById("data_img").src = "http://localhost:8080/"+tmp_img;
-		
+		//alert(tmp_img);
 		//Distance 정해지는 경우 
-		//document.getElementById("data_img").src = "http://localhost:8080/"+img_address;
+		document.getElementById("data_img").src = "http://localhost:8080/"+img_address;
 		
 		
 		updategraph(temp_obj);
-		updategraph(humid_obj);
+		updategraph(distance_obj);
 		updategraph(lux_obj);
 
 //=============================================================================================================================//
 
 //-------------------------------------Trigger 설정한 경우 처리---------------------------------------//
-
-		
-		// var isTrue = false;
-		// if(trigger_nodeID == Data_NodeID[0]){
-			// if((trigger_if == 1) && (valueIF < trigger_value) && valueIF){
-				// isTrue = true;
-			// }
-			// else if(trigger_if == 2 && valueIF == trigger_value){
-				// isTrue = true;
-
-			// }
-			// else if(trigger_if == 3 && valueIF > trigger_value){
-				// isTrue = true;;
-			// }
-			// if(isTrue && trigger_way == "PHONE"){
-				// smsOptions.CONTENT = output_string;
-				// sendsms( function(err,smsOptions) {
-					// alert('Sent SMS : ' + output_string);
-				// });
-				// trigger_if = 0;
-			// }
-			// else if(isTrue && trigger_way == "E-Mail"){
-				// emailOptions.text = output_string;
-				// sendmail( function(err,emailOptions) {
-					// alert('Sent E-MAIL : '+ output_string);
-				// });
-				// trigger_if = 0;
-			// }
-		// }
 
 		
 	}, period*1000);
@@ -596,13 +560,10 @@ function getPhoto(cb) {
 	function(){
 		initMap();
 	}, 500);
-
-	// sendmail( function(err,emailOptions) {
-		// alert('Sent E-MAIL');
-	// });
+	
 //=============================================================================================================================//
 
-//-------------------------------------RepImmediate 버튼 클릭---------------------------------------//
+//-------------------------------------TakePhoto 버튼 클릭---------------------------------------//
 
 	$('#TakePhoto').on('click', function(event) {
 		$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
@@ -611,15 +572,6 @@ function getPhoto(cb) {
 	});
 //=============================================================================================================================//
 
-//-------------------------------------extDevMgmt 버튼 클릭---------------------------------------//
-
-	$('#extDevMgmt').on('click', function(event) {
-		var reqcmd = document.getElementById('command_value').value;
-		$.post('/control', {cmt:'extDevMgmt',cmd: reqcmd}, function(data,status){
-			toastr.info('Your own mgmtCmd : "' + reqcmd + '"');
-		});
-	});
-//=============================================================================================================================//
 
 //=============================================================================================================================//
 function deepCopy(obj) {

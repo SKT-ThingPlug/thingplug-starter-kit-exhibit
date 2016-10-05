@@ -102,7 +102,7 @@ vertical-align:baseline
 }
 
 .sensor_frame_body_value{
- 		font-size:140; line-height: 200px; text-align:right; text-shadow:2px 2px #8C8C8C;
+ 		font-size:1000%; line-height: 200px; text-align:right; text-shadow:2px 2px #8C8C8C;
 }
 .sensor_frame_body_unit{
  		font-size:100; color:black; line-height: 200px; text-align:left; text-shadow:2px 2px #8C8C8C;
@@ -171,27 +171,19 @@ vertical-align:baseline
 			<div class="col-sm-6 col-md-12" style="background-color : lightGray; border-radius: 15px; height: auto">
 				<div class="row" style="font-size:30; border-color : white; border-width : thin; border-style : none none solid none; " align="left">
 					<div class="col-sm-1 col-xs-1">
-						<img src="http://image000.flaticon.com/icons/svg/1/1176.svg" style="width: 100%; height: 24; margin:3">
+						<img src="http://image000.flaticon.com/icons/svg/1/1176.svg" style="width: 100%; height: 30; margin:3">
 					</div>
-					<div class="col-sm-8 col-xs-8" style="text-align: left; font-size:30;">
+					<div class="col-sm-8 col-xs-8" style="text-align: left; font-size:80%;">
 						 Device Information
 					</div>
 				</div>
-				<font size="5">
+				<font size="5em">
 				<div class="row">
-					<div class="col-sm-2 col-xs-4" align="Right">
-						 Device ID :
+					<div class="col-sm-2 col-xs-12" align="left" >
+						  &nbsp; Device ID   :
 					</div>
-					<div class="col-sm-4 col-xs-8" align="left" id="NodeID">
+					<div class="col-sm-4 col-xs-12" align="left" id="NodeID">
 						 ...
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-2 col-xs-4" align="Right">
-						 Firmware Ver :
-					</div>
-					<div class="col-sm-4 col-xs-8" align="left" id="FirmVer_value">
-						 0.1.0
 					</div>
 				</div>
 				</font>
@@ -199,40 +191,24 @@ vertical-align:baseline
 		</div>
 		<br>
 		<br>
-		<div class="row" style="background-color : lightgray; border-color : lightgray; border-width : 2; border-style : solid; border-radius: 15px; height: auto">
-			<div class="col-sm-6 col-md-12" style="background-color : white; height: auto; border-color : lightgray; border-width : 2; border-style : none none solid none; border-radius: 15px; ">
-				<div class="row" style="font-size:30; border-color : lightgray; border-width : 2; border-style : none none solid none; border-radius: 15px; " align="left">
-					<div class="col-sm-1 col-xs-1">
-						<img src="http://image000.flaticon.com/icons/svg/62/62516.svg" style="width: 100%; height: 24; margin:3">
-					</div>
-					<div class="col-sm-8 col-xs-8" style="text-align: left; font-size:30;">
-						 Virtual Device Location On Map
-					</div>
-				</div>
-			</div>
-			<div id="map">
-			</div>
-			<script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script>
-		</div>
-		<br>
 		<div class="row">
 			<div class="col-sm-4 sensor_frame">
 				<div class="row sensor_frame_head">
 					<div class="col-sm-2 col-xs-2">
-						<img src="https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-starter-kit/master/images/sensor.png" style="width: auto; height: 30">
+						<img src="https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-starter-kit/master/images/sensor.png" style="width: auto; height: 40">
 					</div>
 					<div class="col-sm-8 col-xs-8" style="text-align : center">
 						<font size="3">sensor </font>Temp
 					</div>
 					<div class="col-sm-2 col-xs-2">
-						<img src="http://image000.flaticon.com/icons/svg/131/131593.svg" style="max-width: 100%; height: 30;">
+						<img src="http://image000.flaticon.com/icons/svg/131/131593.svg" style="max-width: 100%; height: 40;">
 					</div>
 				</div>
 				<div class="row" style="color : #ea002c; border-color : gainsboro; border-width : 2; border-style : none none solid none;">
-					<div class="col-sm-7 col-xs-7 sensor_frame_body_value" id="temp_value">
+					<div class="col-sm-7 col-xs-7 sensor_frame_body_value" id="temp_value"style=" font-size : 800%">
 						0
 					</div>
-					<div class="col-sm-5 col-xs-5 sensor_frame_body_unit">
+					<div class="col-sm-5 col-xs-5 sensor_frame_body_unit" style="font-size : 600%">
 						&#x2103;
 					</div>
 				</div>
@@ -242,63 +218,67 @@ vertical-align:baseline
 			<div class="col-sm-4 sensor_frame">
 				<div class="row sensor_frame_head">
 					<div class="col-sm-2 col-xs-2">
-						<img src="https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-starter-kit/master/images/sensor.png" style="width: auto; height: 30">
+						<img src="https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-starter-kit/master/images/sensor.png" style="width: auto; height: 40">
 					</div>
 					<div class="col-sm-8 col-xs-8" style="text-align : center">
 						<font size="3">sensor </font>Distance
 					</div>
 					<div class="col-sm-2 col-xs-2">
-						<img src="http://online.focusky.com/qfsz/hfwy/files/extfiles/ext_020151130222331720.png" style="max-width: 100%; height: 30;">
+						<img src="https://cdn3.iconfinder.com/data/icons/medicine-12/164/14-512.png" style="max-width: 100%; height: 40;">
 					</div>
 				</div>
 				<div class="row sensor_frame_body">
-					<div class="col-sm-7 col-xs-7 sensor_frame_body_value" id="humid_value">
+					<div class="col-sm-7 col-xs-7 sensor_frame_body_value" id="distance_value" style="font-size : 800%">
 						0
 					</div>
-					<div class="col-xs-5 col-xs-5 sensor_frame_body_unit">
-						%
+					<div class="col-xs-5 col-xs-5 sensor_frame_body_unit" style="font-size : 600%">
+						cm
 					</div>
 				</div>
-				<div id="graph_humid" class="graph_humid" style="max-width: 100%; height: 256; display:block;">
+				<div id="graph_distance" class="graph_distance" style="max-width: 100%; height: 256; display:block;">
 				</div>
 			</div>
+			
 			<div class="col-sm-4 sensor_frame">
 				<div class="row sensor_frame_head">
 					<div class="col-sm-2 col-xs-2">
-						<img src="https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-starter-kit/master/images/sensor.png" style="width: auto; height: 30">
+						<img src="https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-starter-kit/master/images/sensor.png" style="width: auto; height: 40">
 					</div>
 					<div class="col-sm-8 col-xs-8" style="text-align : center">
-						<font size="3">sensor </font>Brightness
+						<font size="3">sensor </font>Bright
 					</div>
 					<div class="col-sm-2 col-xs-2">
-						<img src="http://image000.flaticon.com/icons/svg/148/148819.svg" style="max-width: 100%; height: 30;">
+						<img src="http://image000.flaticon.com/icons/svg/148/148819.svg" style="max-width: 100%; height: 40;">
 					</div>
 				</div>
 				<div class="row sensor_frame_body">
-					<div class="col-sm-7 col-xs-7 sensor_frame_body_value" id="lux_value">
+					<div class="col-sm-7 col-xs-7 sensor_frame_body_value" id="lux_value" style="font-size : 800%">
 						0
 					</div>
-					<div class="col-sm-5 col-xs-5 sensor_frame_body_unit">
+					<div class="col-xs-5 col-xs-5 sensor_frame_body_unit" style="font-size : 600%">
 						lux
 					</div>
 				</div>
-				<div id="graph_lux" class="graph_lux" style="max-width: 100%; height: 256; display:block">
+				<div id="graph_lux" class="graph_lux" style="max-width: 100%; height: 256; display:block;">
 				</div>
 			</div>
 		</div>
 		<br>
 		
+		<img id="data_img" img src="http://orig06.deviantart.net/df77/f/2013/094/8/d/loading_logofinal_by_zegerdon-d60eb1v.gif" style="width: 60%; height: auto; margin:1"/>
+        <br>
+        <br>
 			<div class="row action_frame">
 				<div class="col-sm-6 col-md-12" style="background-color : lightGray; border-radius: 15px; height: auto">	
 					<div class="row action_frame_head">
 						<div class="col-sm-2 col-xs-2">
-							<img src="http://image000.flaticon.com/icons/svg/99/99086.svg" style="width: 100%; height: 30">
+							<img src="http://image000.flaticon.com/icons/svg/99/99086.svg" style="width: 100%; height: 40">
 						</div>
 						<div class="col-sm-8 col-xs-8" style="text-align : center">
 							<font size="3">actuactor </font>Camera
 						</div>
 						<div class="col-sm-2 col-xs-2">
-							<img src="http://teslathemes.com/wp-content/uploads/2013/11/Retina-Ready.png" style="max-width: 100%; height: 30;">
+							<img src="http://teslathemes.com/wp-content/uploads/2013/11/Retina-Ready.png" style="max-width: 100%; height: 40;">
 						</div>
 					</div>
 					<div class="row" align="center">
@@ -310,33 +290,8 @@ vertical-align:baseline
 				</div>
 			</div>
 			</font>
-
-		<div class="row sensor_frame">
-			<div class="col-sm-6 col-md-12" style="background-color : lightGray; border-radius: 15px; height: auto">
-				<div class="row action_frame_head">
-					<div class="col-sm-2 col-xs-2">
-						<img src="http://image000.flaticon.com/icons/svg/99/99086.svg" style="width: 100%; height: 30">
-					</div>
-					<div class="col-sm-8 col-xs-8" style="text-align : center">
-						<font size="3">actuactor </font>extDevMgmt
-					</div>
-					<div class="col-sm-2 col-xs-2">
-						<img src="http://plainicon.com/dboard/userprod/2802_db2aa/prod_thumb/plainicon.com-39365-256px.png" style="max-width: 100%; height: 30;">
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-sm-6 col-md-6 col-xs-6" style="vertical-align:bottom">
-						<input type="text" id="command_value" name="command_value" value="Type Command" style="text-align:center; width:100%; height: 34px; color:lightGray" onfocus="this.value='';this.style.color='black';return true" width="100%"></input>
-					</div>
-					<div class="col-sm-6 col-md-6 col-xs-6">
-						<a class="myButton" id="extDevMgmt" style="width:103%;height:35">SEND Command</a>
-					</div>
-				</div>
-			</div>
-		</div>
 		<br>
 		
-		<img id="data_img" img src="" style="width: auto; height: 600; margin:1"/>
 	</div>
 </div>
 <br>
