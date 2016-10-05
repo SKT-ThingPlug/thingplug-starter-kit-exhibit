@@ -55,16 +55,10 @@ jQuery(document).ready(function() {
 	
 	var emailOptions = {			// 알림 메시지를 받을 이메일 정보
 		from: 'ThingPlug <skt.thingplug@gmail.com>',
-		to: 'tototo',
+		to: 'mailto@sdddk.com',
 		subject: 'ThingPlug Alert',
 		//text: 'Temp : ' + data_temp[0].toString() + ', Humidity : ' + data_humid[0].toString() + ', Brightness : ' + data_lux[0].toString(),
 		text: 'test for image',
-		html: 'Embedded image: <img src="skt.thingplug@gmail.com"/>',
-		attachments: [{
-			filename: '20160928053309.jpg',
-			path: '/test',
-			cid: 'skt.thingplug@gmail.com' //same cid value as in the html img src
-		}]
 
 	};
 	
@@ -73,7 +67,8 @@ jQuery(document).ready(function() {
 	// var img_address2 = 1;
 	// var img_address3 = ".png";
 	
-	var data_distance = 190;			//거리 기준값
+	var distance_threshold = 30;			//거리 기준값
+	var temp_thresold = 30;			//온도 기준값
 	var tmp_img = "";				//이미지 임시값
 	var img_address = "capture/";
 	
@@ -482,13 +477,13 @@ function getPhoto(cb) {
 		getPhoto(function(err, img_addr){
 			tmp_img = img_addr;
 		});
-		
 		//alert(img_address);
 		getData(container_name, function(err,time,data_prim, gwl, geui){
 			
 			
 			
 			var valueLux = data_prim.substring(38,42); //data_prim.split(delimiter[nodeIndex])[2];
+			//alert(valueLux);
 			//console.log('[Error] lux substring:' + valueLux); //lesmin
 			valueLux = parseInt(valueLux, 16);
 			//console.log('[Error] lux Hex-to-Dec:' + valueLux); //lesmin
@@ -522,12 +517,12 @@ function getPhoto(cb) {
 			var valueDistance = data_prim.substring(53,56);//어느부분인지 확인해야함
 			valueDistance = parseInt(valueDistance, 16);
 			//alert(valueDistance);
-			if(valueDistance < data_distance && tmp_img != img_address){
-				img_address = tmp_img;
-				$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
-					toastr.warning('Take Photo');
-				});
-			}
+			// if(valueDistance < distance_threshold && tmp_img != img_address){
+				// img_address = tmp_img;
+				// $.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
+					// toastr.warning('Take Photo');
+				// });
+			// }
 						
 			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
@@ -536,25 +531,9 @@ function getPhoto(cb) {
 			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
 			
-			// var valueTemp = data_prim.split(delimiter[nodeIndex])[0];
-			// var valueHumid = data_prim.split(delimiter[nodeIndex])[1];
-			// var valueLux = data_prim.split(delimiter[nodeIndex])[2];
-			
 			insertData(data_temp,valueTemp, '#temp_value');
-			insertData(data_humid,valueHumid, '#humid_value');
+			insertData(data_humid,valueDistance, '#humid_value');
 			insertData(data_lux,valueLux, '#lux_value');
-			
-			output_string = 'Device ID : '+nodeID[nodeIndex]+', Temp : ' + valueTemp.toString() + ', Humidity : ' + valueHumid.toString() + ', Brightness : ' + valueLux.toString();
-			if(trigger_sensor == "Temperature"){//Temperature
-				valueIF = parseInt(valueTemp);
-			}
-			else if(trigger_sensor == "Humidity"){//Humidity
-				valueIF = parseInt(valueHumid);
-			}
-			else if(trigger_sensor == "Bright"){//Bright
-				valueIF = parseInt(valueLux);
-			}
-			
 
 		});
 		
@@ -563,11 +542,11 @@ function getPhoto(cb) {
 		
 		//document.getElementById("data_img").src = img_address;
 		//$("#data_img").attr("src", "file://"+tmp_img);
-		//alert(tmp_img);
 		
-		//var img = fr.readAsDataURL("C:\Users\1110768\OneDrive\문서\스타터킷\소스코드\thingplug-starter-kit_image\capture\20160928053309.jpg");
-		//document.getElementById("data_img").src = "file:\/\/C:\/test.jpg";
+		alert(tmp_img);
 		document.getElementById("data_img").src = "http://localhost:8080/"+tmp_img;
+		
+		//Distance 정해지는 경우 
 		//document.getElementById("data_img").src = "http://localhost:8080/"+img_address;
 		
 		
@@ -580,33 +559,33 @@ function getPhoto(cb) {
 //-------------------------------------Trigger 설정한 경우 처리---------------------------------------//
 
 		
-		var isTrue = false;
-		if(trigger_nodeID == Data_NodeID[0]){
-			if((trigger_if == 1) && (valueIF < trigger_value) && valueIF){
-				isTrue = true;
-			}
-			else if(trigger_if == 2 && valueIF == trigger_value){
-				isTrue = true;
+		// var isTrue = false;
+		// if(trigger_nodeID == Data_NodeID[0]){
+			// if((trigger_if == 1) && (valueIF < trigger_value) && valueIF){
+				// isTrue = true;
+			// }
+			// else if(trigger_if == 2 && valueIF == trigger_value){
+				// isTrue = true;
 
-			}
-			else if(trigger_if == 3 && valueIF > trigger_value){
-				isTrue = true;;
-			}
-			if(isTrue && trigger_way == "PHONE"){
-				smsOptions.CONTENT = output_string;
-				sendsms( function(err,smsOptions) {
-					alert('Sent SMS : ' + output_string);
-				});
-				trigger_if = 0;
-			}
-			else if(isTrue && trigger_way == "E-Mail"){
-				emailOptions.text = output_string;
-				sendmail( function(err,emailOptions) {
-					alert('Sent E-MAIL : '+ output_string);
-				});
-				trigger_if = 0;
-			}
-		}
+			// }
+			// else if(trigger_if == 3 && valueIF > trigger_value){
+				// isTrue = true;;
+			// }
+			// if(isTrue && trigger_way == "PHONE"){
+				// smsOptions.CONTENT = output_string;
+				// sendsms( function(err,smsOptions) {
+					// alert('Sent SMS : ' + output_string);
+				// });
+				// trigger_if = 0;
+			// }
+			// else if(isTrue && trigger_way == "E-Mail"){
+				// emailOptions.text = output_string;
+				// sendmail( function(err,emailOptions) {
+					// alert('Sent E-MAIL : '+ output_string);
+				// });
+				// trigger_if = 0;
+			// }
+		// }
 
 		
 	}, period*1000);
@@ -618,9 +597,9 @@ function getPhoto(cb) {
 		initMap();
 	}, 500);
 
-				// sendmail( function(err,emailOptions) {
-					// alert('Sent E-MAIL');
-				// });
+	// sendmail( function(err,emailOptions) {
+		// alert('Sent E-MAIL');
+	// });
 //=============================================================================================================================//
 
 //-------------------------------------RepImmediate 버튼 클릭---------------------------------------//
