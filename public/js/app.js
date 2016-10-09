@@ -67,8 +67,8 @@ jQuery(document).ready(function() {
 	var temp_threshold = 30;		//온도 기준값
 	var bright_threshold = 150;		//밝기 기준값
 	
-	var tmp_img = "";				//이미지 임시값
-	var img_address = "capture/";
+	var tmp_img = "https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-starter-kit/master/images/thingplug--onem2m-logo.png";				//이미지 임시값
+	var img_address = "";
 	
 //----------------------------------------- graph Related Variables---------------------------------------//
 
@@ -458,7 +458,9 @@ function getPhoto(cb) {
 
 	setInterval(function(){
 		getPhoto(function(err, img_addr){
-			tmp_img = img_addr;
+			if(img_addr != null){
+				tmp_img = img_addr;
+			}
 		});
 		//alert(img_address);
 		getData(container_name, function(err,time,data_prim, gwl, geui){
@@ -501,7 +503,7 @@ function getPhoto(cb) {
 			valueDistance = parseInt(valueDistance, 16);
 			//alert(valueDistance);
 			
-			if(valueDistance < distance_threshold && tmp_img != img_address){
+			if(valueDistance < distance_threshold && tmp_img != img_address && tmp_img != null){
 				img_address = tmp_img;
 				$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
 					toastr.warning('Take Photo');
@@ -540,8 +542,12 @@ function getPhoto(cb) {
 		
 		//alert(tmp_img);
 		//Distance 정해지는 경우 
-		document.getElementById("data_img").src = "http://localhost:8080/"+img_address;
-		
+		if(img_address != null){
+			document.getElementById("data_img").src = "http://localhost:8080/"+img_address;
+		}
+		else{
+			document.getElementById("data_img").src = tmp_img;
+		}
 		
 		updategraph(temp_obj);
 		updategraph(distance_obj);
