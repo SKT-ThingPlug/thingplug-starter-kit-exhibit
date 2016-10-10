@@ -457,11 +457,14 @@ function getPhoto(cb) {
 	});
 	var LED_RED = "false";
 	var LED_GREEN = "false";
+	var DISTANCE_FLAG = "false";
+
 	setInterval(function(){
 		getPhoto(function(err, img_addr){
-			tmp_img = img_addr;
+			if(img_address != img_addr){
+				tmp_img = img_addr;
+			}
 		});
-		//alert(img_address);
 		getData(container_name, function(err,time,data_prim, gwl, geui){
 			
 			
@@ -505,12 +508,27 @@ function getPhoto(cb) {
 			img_address = tmp_img;
 
 			//if(valueDistance < distance_threshold && tmp_img != img_address){
+			//console.log("##"+valueDistance+" < "+distance_threshold+" d_flag="+DISTANCE_FLAG);
 			if(valueDistance < distance_threshold ){
-				//img_address = tmp_img;
-				$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
-					toastr.warning('Take Photo');
-				});
+				if(DISTANCE_FLAG == "false"){
+					DISTANCE_FLAG = "true";	
+			//		console.log("under distance : " + CAMERA_FLAG);
+			//		if(CAMERA_FLAG == "false"){
+						//img_address = tmp_img;
+						$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
+							toastr.warning('Take Photo');
+						});
+			//			CAMERA_FLAG = "true";
+			//		}
+				}
 			}
+			else{
+
+			//	console.log("over distance : " + CAMERA_FLAG);
+				//CAMERA_FLAG = "false";
+				DISTANCE_FLAG = "false";
+			}
+		
 			
 			if(valueLux < bright_threshold){
 				if(LED_GREEN == "false" ){

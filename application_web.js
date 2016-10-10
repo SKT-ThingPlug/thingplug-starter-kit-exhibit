@@ -227,7 +227,6 @@ console.log("PHOTO");
 else if(mgmtCmdPrefix == "LEDControl"){
 console.log("LED");
 console.log("/"+config[configIndex].AppEUI+"/"+config[configIndex].version+"/mgmtCmd-"+config[configIndex].nodeID + "_" + mgmtCmdPrefix);
-if(mgmtCmdPrefix == "TakePhoto"){
 httpReq({ 
     options: {
       host : config[configIndex].TPhost,
@@ -244,8 +243,7 @@ httpReq({
       },
 		body : {mgc:{
     exra : cmd,			//제어 요청(일반적으로 원격 장치를 RPC호출)을 위한 Argument 정의 (exra == execReqArgs)
-    exe : true,						//제어 요청 Trigger 속성으로 해당 속성은 (True/False로 표현) (exe == execEnabler)
-	cmt : mgmtCmdPrefix
+    exe : true						//제어 요청 Trigger 속성으로 해당 속성은 (True/False로 표현) (exe == execEnabler)
   }}
 
 }).then(function(result){
@@ -256,7 +254,6 @@ httpReq({
   }
   
 });
-}
 }
 }
 //=============================================================================================================================//
