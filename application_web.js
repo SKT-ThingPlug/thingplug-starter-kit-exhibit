@@ -102,7 +102,7 @@ app.post('/control', function(req,res) {
   var cmd = JSON.stringify(req.body);
   console.log("{\"cmd\":\""+req.body.cmd+"\"}");
   console.log("{\"cmt\":\""+req.body.cmt+"\"}");
-  reqMgmtCmd(req.body.cmt, "{\"cmd\":\""+req.body.cmd+"\"}", "ND00000000000000000915", function(err, data){
+  reqMgmtCmd(req.body.cmt, "{\"cmd\":\""+req.body.cmd+"\"}", "ND00000000000000000902", function(err, data){
     if(err) return res.send({'error':err});
     return res.send({'result':'ok'});
   });
@@ -192,6 +192,9 @@ httpReq({
 
 function reqMgmtCmd(mgmtCmdPrefix, cmd, nodeRI, cb){
 // 2. mgmCmd 요청
+//console.log("/"+config[configIndex].AppEUI+"/"+config[configIndex].version+"/mgmtCmd-"+config[configIndex].RaspID + "_" + mgmtCmdPrefix);
+if(mgmtCmdPrefix == "TakePhoto"){
+console.log("PHOTO");
 	httpReq({ 
     options: {
       host : config[configIndex].TPhost,
@@ -211,6 +214,7 @@ function reqMgmtCmd(mgmtCmdPrefix, cmd, nodeRI, cb){
     exe : true,						//제어 요청 Trigger 속성으로 해당 속성은 (True/False로 표현) (exe == execEnabler)
 	cmt : mgmtCmdPrefix
   }}
+
 }).then(function(result){
   console.log(colors.green('mgmtCmd 제어 요청'));
   if(result.data){
@@ -219,5 +223,40 @@ function reqMgmtCmd(mgmtCmdPrefix, cmd, nodeRI, cb){
   }
   
 });
+}
+else if(mgmtCmdPrefix == "LEDControl"){
+console.log("LED");
+console.log("/"+config[configIndex].AppEUI+"/"+config[configIndex].version+"/mgmtCmd-"+config[configIndex].nodeID + "_" + mgmtCmdPrefix);
+if(mgmtCmdPrefix == "TakePhoto"){
+httpReq({ 
+    options: {
+      host : config[configIndex].TPhost,
+      port : config[configIndex].TPport,
+      path : '/'+config[configIndex].AppEUI+'/'+config[configIndex].version+'/mgmtCmd-'+config[configIndex].nodeID + '_' + mgmtCmdPrefix,
+      method: 'PUT',
+      headers : {
+        Accept: 'application/json',
+        uKey : config[configIndex].uKey,
+        'X-M2M-Origin': config[configIndex].nodeID,
+        'X-M2M-RI': config[configIndex].nodeID+'_'+randomInt(100000, 999999),
+		'Content-Type': 'application/json;ty=8'
+	  }
+      },
+		body : {mgc:{
+    exra : cmd,			//제어 요청(일반적으로 원격 장치를 RPC호출)을 위한 Argument 정의 (exra == execReqArgs)
+    exe : true,						//제어 요청 Trigger 속성으로 해당 속성은 (True/False로 표현) (exe == execEnabler)
+	cmt : mgmtCmdPrefix
+  }}
+
+}).then(function(result){
+  console.log(colors.green('mgmtCmd 제어 요청'));
+  if(result.data){
+		var data = JSON.parse(result.data);
+		return cb(null, data);
+  }
+  
+});
+}
+}
 }
 //=============================================================================================================================//

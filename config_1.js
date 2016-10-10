@@ -35,7 +35,7 @@ module.exports = {
   nodeID : '1.2.481.1.999.198.000100',         		// Device 구분을 위한 LTID, 디바이스 고유 ID 사용
   RaspID : '1.2.481.1.999.203.000100',
   passCode : '1234',                          		// ThingPlug에 Device등록 시 사용할 Device의 비밀번호
-  uKey : 'eThFNmhvZkJFdzBNSmZpRFJabjZLVXV6NjhreHNEWExMZXlxMmxMT0o4NFVoeVFUWDY2R0M1bFpLd0s4WXRKZw==',                	
+  uKey : '',                	
 //													Thingplug로그인 후, `마이페이지`에 있는 사용자 인증키
   containerName:'1.2.481.1.999.198.000100_container_01',                     // starter kit에서 생성하고 사용할 container 이름 (임의지정)
   DevReset : 'DevReset',                        	// starter kit에서 생성하고 사용할 제어 명령 DevReset

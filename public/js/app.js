@@ -67,8 +67,8 @@ jQuery(document).ready(function() {
 	var temp_threshold = 30;		//온도 기준값
 	var bright_threshold = 150;		//밝기 기준값
 	
-	var tmp_img = "https://raw.githubusercontent.com/SKT-ThingPlug/thingplug-starter-kit/master/images/thingplug--onem2m-logo.png";				//이미지 임시값
-	var img_address = "";
+	var tmp_img = "capture/default.jpg";				//이미지 임시값
+	var img_address = "capture/default.jpg";
 	
 //----------------------------------------- graph Related Variables---------------------------------------//
 
@@ -455,12 +455,11 @@ function getPhoto(cb) {
 			container_name = config.containerName;
 		}
 	});
-
+	var LED_RED = "false";
+	var LED_GREEN = "false";
 	setInterval(function(){
 		getPhoto(function(err, img_addr){
-			if(img_addr != null){
-				tmp_img = img_addr;
-			}
+			tmp_img = img_addr;
 		});
 		//alert(img_address);
 		getData(container_name, function(err,time,data_prim, gwl, geui){
@@ -503,23 +502,44 @@ function getPhoto(cb) {
 			valueDistance = parseInt(valueDistance, 16);
 			//alert(valueDistance);
 			
-			if(valueDistance < distance_threshold && tmp_img != img_address && tmp_img != null){
-				img_address = tmp_img;
+			img_address = tmp_img;
+
+			//if(valueDistance < distance_threshold && tmp_img != img_address){
+			if(valueDistance < distance_threshold ){
+				//img_address = tmp_img;
 				$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
 					toastr.warning('Take Photo');
 				});
 			}
 			
-			if(valueLux < bright_threshold ){
+			if(valueLux < bright_threshold){
+				if(LED_GREEN == "false" ){
+					$.post('/control', {cmt:'LEDControl',cmd:'G1'}, function(data,status){
+						toastr.success('Turn On Lights');
+					});
+					LED_GREEN = "true";
+				}
+			}
+			else if(LED_GREEN == "true"){//(valueLux >= bright_threshold )
 				$.post('/control', {cmt:'LEDControl',cmd:'G0'}, function(data,status){
-					toastr.success('Turn On Lights');
+					toastr.success('Turn Off Lights');
 				});
+				LED_GREEN = "false";
 			}
 			
-			if(valueTemp > temp_threshold ){
+			if(valueTemp > temp_threshold){
+				if(LED_GREEN == "false"){
+					$.post('/control', {cmt:'LEDControl',cmd:'R1'}, function(data,status){
+						toastr.error('Emergency');
+					});
+					LED_RED = "true";
+				}	
+			}
+			else if(LED_RED == "true"){//(valueTemp <= temp_threshold )
 				$.post('/control', {cmt:'LEDControl',cmd:'R0'}, function(data,status){
 					toastr.error('Emergency');
 				});
+				LED_RED = "false";
 			}
 						
 			///////////////////////////////////////////////////////////////////////////
@@ -542,12 +562,8 @@ function getPhoto(cb) {
 		
 		//alert(tmp_img);
 		//Distance 정해지는 경우 
-		if(img_address != null){
-			document.getElementById("data_img").src = "http://localhost:8080/"+img_address;
-		}
-		else{
-			document.getElementById("data_img").src = tmp_img;
-		}
+		document.getElementById("data_img").src = "http://192.168.15.2:8888/"+img_address;
+		
 		
 		updategraph(temp_obj);
 		updategraph(distance_obj);
