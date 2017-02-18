@@ -147,7 +147,6 @@ void SRASetValueToTLV(char *sensorType, char* value, char* hexData)
     int idx = SMAGetSensorIndex(sensorType);
     int intTemp;
     int i;
-    //char res[5] = "";
     switch(idx) {
         case ULTRASONIC_IDX:
             intTemp = atoi(value);
