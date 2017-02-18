@@ -465,11 +465,15 @@ function getPhoto(cb) {
 				tmp_img = img_addr;
 			}
 		});
+	}, period*1000);
+
+
+	setInterval(function(){
 		getData(container_name, function(err,time,data_prim, gwl, geui){
 			
 			
 			
-			var valueLux = data_prim.substring(38,42); //data_prim.split(delimiter[nodeIndex])[2];
+			var valueLux = data_prim.substring(46,50); //data_prim.split(delimiter[nodeIndex])[2];
 			//alert(valueLux);
 			//console.log('[Error] lux substring:' + valueLux); //lesmin
 			valueLux = parseInt(valueLux, 16);
@@ -477,7 +481,7 @@ function getPhoto(cb) {
 			//valueLux = Math.round(valueLux);
 			//valueLux = Math.round((1050 - valueLux)/2);
 
-			var valueTemp = data_prim.substring(30,34); //data_prim.split(delimiter[nodeIndex])[0];
+			var valueTemp = data_prim.substring(24,28); //data_prim.split(delimiter[nodeIndex])[0];
 			//console.log('[Error] temp substring:' + valueTemp); //lesmin
 			valueTemp = parseInt(valueTemp, 16);
 			//console.log('[Error] temp Hex-to-Dec:' + valueTemp); //lesmin
@@ -486,7 +490,7 @@ function getPhoto(cb) {
 
 
 			//var valueHumid = data_prim.substring(46,48); //data_prim.split(delimiter[nodeIndex])[1];
-			var valueHumid = data_prim.substring(4,6); //lesmin battery = Gyro Z
+			var valueHumid = data_prim.substring(40,42); //lesmin battery = Gyro Z
 			//console.log('[Error] Humid substring:' + valueHumid); //lesmin
 			valueHumid = parseInt(valueHumid, 16);
 			//console.log('[Error] Humid Hex-to-Dec:' + valueHumid); //lesmin
@@ -501,7 +505,7 @@ function getPhoto(cb) {
 			///////////////////////////////////////////////////////////////////////////
 			///////////////////////////////////////////////////////////////////////////
 			
-			var valueDistance = data_prim.substring(53,56);//어느부분인지 확인해야함
+			var valueDistance = data_prim.substring(32,36);//어느부분인지 확인해야함
 			valueDistance = parseInt(valueDistance, 16);
 			//alert(valueDistance);
 			
@@ -546,7 +550,7 @@ function getPhoto(cb) {
 			}
 			
 			if(valueTemp > temp_threshold){
-				if(LED_GREEN == "false"){
+				if(LED_RED == "false"){
 					$.post('/control', {cmt:'LEDControl',cmd:'R1'}, function(data,status){
 						toastr.error('Emergency');
 					});
@@ -580,7 +584,9 @@ function getPhoto(cb) {
 		
 		//alert(tmp_img);
 		//Distance 정해지는 경우 
-		document.getElementById("data_img").src = "http://192.168.15.2:8888/"+img_address;
+		//console.log(img_address); //lesmin
+		document.getElementById("data_img").src = "/"+img_address;
+		//document.getElementById("data_img").src = "http://192.168.15.2:8888/"+img_address;
 		
 		
 		updategraph(temp_obj);
@@ -606,8 +612,8 @@ function getPhoto(cb) {
 //-------------------------------------TakePhoto 버튼 클릭---------------------------------------//
 
 	$('#TakePhoto').on('click', function(event) {
-		$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
-			toastr.warning('Take Photo');
+		$.post('/control', {cmt:'TakePhoto', cmd:'request'}, function(data, status){
+			toastr.warning('Take Photo Done');
 		});
 	});
 //=============================================================================================================================//

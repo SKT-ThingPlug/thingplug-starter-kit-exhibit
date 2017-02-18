@@ -28,16 +28,16 @@ module.exports = {
   responsePORT : '1357',                        	// HTTP버전에서 디바이스제어를 위한 디바이스의 물리적 주소의 로컬 포트
 
 
-  userID : 'kjh15011',                          	// MQTT버전에서 Broker 접속을 위한 ID, 포털 ID 사용
-  mqttClientId : 'MQTT Client ID1',    				// MQTT버전에서 Broker 접속을 위한 client ID
+  userID : 'demoday',                          	// MQTT버전에서 Broker 접속을 위한 ID, 포털 ID 사용
+  mqttClientId : '1aaf6443e6d845a3af4b6c60e252d483',    				// MQTT버전에서 Broker 접속을 위한 client ID
 
 
-  nodeID : '1.2.481.1.999.198.000100',         		// Device 구분을 위한 LTID, 디바이스 고유 ID 사용
-  RaspID : '1.2.481.1.999.203.000100',
-  passCode : '1234',                          		// ThingPlug에 Device등록 시 사용할 Device의 비밀번호
+  nodeID : '1.2.481.1.999.198.000101',         		// Device 구분을 위한 LTID, 디바이스 고유 ID 사용
+  RaspID : '1.2.481.1.999.215.000101',				// Raspberry Pi용 NodeID
+  passCode : '123456',                          		// ThingPlug에 Device등록 시 사용할 Device의 비밀번호
   uKey : '',                	
 //													Thingplug로그인 후, `마이페이지`에 있는 사용자 인증키
-  containerName:'1.2.481.1.999.198.000100_container_01',                     // starter kit에서 생성하고 사용할 container 이름 (임의지정)
+  containerName:'1.2.481.1.999.198.000101_container_01',                     // starter kit에서 생성하고 사용할 container 이름 (임의지정)
   DevReset : 'DevReset',                        	// starter kit에서 생성하고 사용할 제어 명령 DevReset
   RepPerChange : 'RepPerChange',                	// starter kit에서 생성하고 사용할 제어 명령 RepPerChange
   RepImmediate : 'RepImmediate',                	// starter kit에서 생성하고 사용할 제어 명령 RepImmediate

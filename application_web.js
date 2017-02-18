@@ -34,8 +34,14 @@ var colors = require('colors');
 
 var Promise = require('es6-promise').Promise;
 
+
+process.on('uncaughtException', function(err) {
+  console.log('Caught exception: ' + err);
+}); //lesmin debug
+
 app.set('port', process.env.PORT || 3000);
 app.use('/dashboard', express.static(path.join(__dirname,'public')));
+app.use('/capture', express.static(path.join(__dirname,'public/capture')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -154,6 +160,9 @@ httpReq({
 
 		return cb(null, data);
   }
+  else {
+    return cb(result, null);
+  }
 });
 }
 
@@ -181,6 +190,9 @@ httpReq({
 		
 
 		return cb(null, data);
+  }
+  else {
+    return cb(result, null);
   }
 });
 }
