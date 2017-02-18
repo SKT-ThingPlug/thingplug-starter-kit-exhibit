@@ -15,7 +15,7 @@
 
 void setup()
 {
-    byte mac[] = { 0x00, 0x11, 0x22, 0x44, 0x55, 0x66 };
+    byte mac[] = { 0x90, 0xA2, 0xDA, 0x10, 0x30, 0xBD };
     Serial.begin(9600);
     //while (!Serial) {
     //    ; // wait for serial port to connect. Needed for native USB port only

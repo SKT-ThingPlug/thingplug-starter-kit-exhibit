@@ -40,7 +40,7 @@
 
 #define TOPIC_PUBLISH                       "/oneM2M/req/%s/%s"
 
-#define ONEM2M_CLIENTID                     "5566" // mac address ends
+#define ONEM2M_CLIENTID                     "30BD" // mac address ends
 
 #endif // _CONFIGURATION_H_
 
