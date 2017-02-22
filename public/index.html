@@ -134,10 +134,14 @@ vertical-align:baseline
 <link rel="stylesheet" href="./css/bootstrap.min.css">
 <link rel="stylesheet" href="./css/bootstrap-theme.min.css">
 <link rel="stylesheet" href="./css/toastr.min.css">
+<link rel="stylesheet" href="./css/rickshaw.css">
 <script src="./js/jquery.min.js"></script>
 <script src="./js/bootstrap.min.js"></script>
 <script src="./js/toastr.min.js"></script>
 <script src="./js/d3.v2.js"></script>
+<script src="./js/d3.min.js"></script>
+<script src="./js/d3.layout.min.js"></script>
+<script src="./js/rickshaw.js"></script>
 <script src="https://maps.googleapis.com/maps/api/js" async defer></script>
 <script src="./js/app.js"></script>
 <title>ThingPlug StarterKit</title>
@@ -152,7 +156,7 @@ vertical-align:baseline
 			<div class="navbar-header">
 				<div class="logo" style="vertical-align:middle">
 					<a href="http://thingplug.sktiot.com/" style="font-size:2em; color : gray;">
-					<img alt="Brand" class="navbar-brand-logo" src="https://thingplug.sktiot.com/image/common/logo.png" style="height:45px"></a>
+					<img alt="Brand" class="navbar-brand-logo" src="https://thingplug.sktiot.com/image/common/logo.png" style="height:50px"></a>
 				</div>
 			</div>
 		</div>
@@ -191,6 +195,7 @@ vertical-align:baseline
 		</div>
 		<br>
 		<br>
+		
 		<div class="row">
 			<div class="col-sm-4 sensor_frame">
 				<div class="row sensor_frame_head">
@@ -212,8 +217,7 @@ vertical-align:baseline
 						&#x2103;
 					</div>
 				</div>
-				<div id="graph_temp" class="graph_temp" style="max-width: 100%; height: 256; display:block;">
-				</div>
+				<div id="chart_temp" class="chart_temp" style="max-width: 100%; height: 256; display:block;"></div>
 			</div>
 			<div class="col-sm-4 sensor_frame">
 				<div class="row sensor_frame_head">
@@ -235,7 +239,7 @@ vertical-align:baseline
 						cm
 					</div>
 				</div>
-				<div id="graph_distance" class="graph_distance" style="max-width: 100%; height: 256; display:block;">
+				<div id="chart_dist" class="chart_dist" style="max-width: 100%; height: 256; display:block;">
 				</div>
 			</div>
 			
@@ -259,7 +263,7 @@ vertical-align:baseline
 						lux
 					</div>
 				</div>
-				<div id="graph_lux" class="graph_lux" style="max-width: 100%; height: 256; display:block;">
+				<div id="chart_light" class="chart_light" style="max-width: 100%; height: 256; display:block;">
 				</div>
 			</div>
 		</div>

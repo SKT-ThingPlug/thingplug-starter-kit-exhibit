@@ -19,134 +19,197 @@
 
 jQuery(document).ready(function() {
 	var data = [0];					// 디바이스의 Raw Data 확인	
-	var data_humid = [0];			// 웹페이지에 출력되는 습도값
-	var data_temp = [0];			// 웹페이지에 출력되는 온도값
-	var data_lux = [0];				// 웹페이지에 출력되는 조도값
-	var data_distance = [0];		// 웹페이지에 출력되는 거리값
-	var Data_Firm = [0];			// 웹페이지에 출력되는 가상의 Firmware Version
-	var Data_NodeID = [0];			// 웹페이지에 출력되는 LTID
-	
-	var data_img = [0];
 	
 	var numOfDevice = 1;			// 웹페이지에서 확인할 디바이스의 갯수 (config.js의 갯수)
 	var nodeIndex=0;				// 현재 출력되는 (config-1) 정보 ex) nodeIndex =0 -> config_1 정보	
 	var period = 1;					// getLatestData 주기 sec (RepPerChange 명령에 의해 변경)
 	var container_name = 'LoRa';	// 생성한 container의 이름 (config.js 수정)
 
-	var Firm_Ver = [];				// 가상의 Firmware Version 정보 저장
 	var nodeID = [];				// LTID 정보 저장
 	var delimiter = [];				// 디바이스에서 전달되는 <con> 데이터의 구분자 (config.js 수정)
 
-	var MAX_DATA = 30;				// 그래프에 표시되는 데이터의 갯수			
 	var map = null;					// 지도 정보
-	
 	var valueLat = "0";				// 지도에 표시될 디바이스의 위도 Tmp
 	var valueLng = "0";				// 지도에 표시될 디바이스의 경도 Tmp
 	
-	var result_lat = new Array();	// 지도에 표시될 디바이스의 위도 보관
-	var result_lng = new Array();	// 지도에 표시될 디바이스의 경도 보관
+	var result_lat = [];	// 지도에 표시될 디바이스의 위도 보관
+	var result_lng = [];	// 지도에 표시될 디바이스의 경도 보관
 
-	var valueIF = null;				// 트리거 상태 값 (트리거로 등록한 센서의 현재 값)
-	var trigger_sensor = null;		// 트리거로 등록한 센서 종류(온도, 습도, 조도)
-	var trigger_if = null;			// 트리거 옵션(이상|이하|같음)
-	var trigger_value = null;		// 트리거 기준 값 (ex : 센서의 value값 이상|이하|같음 인 경우 메시지 전송)
-	var trigger_way = null;			// 알림방식 (E-MAIL만 지원)
-	var trigger_nodeID = null;		// 알림받을 LTID
-	var output_string = "test for image";		// 알림메시지
-	
 	var emailOptions = {			// 알림 메시지를 받을 이메일 정보
 		from: 'ThingPlug <skt.thingplug@gmail.com>',
 		to: 'mailto@sdddk.com',
 		subject: 'ThingPlug Alert',
-		//text: 'Temp : ' + data_temp[0].toString() + ', Humidity : ' + data_humid[0].toString() + ', Brightness : ' + data_lux[0].toString(),
 		text: 'test for image',
 
 	};
 		
-	var distance_threshold = 30;	//거리 기준값
-	var temp_threshold = 30;		//온도 기준값
-	var bright_threshold = 150;		//밝기 기준값
+	var distance_threshold = 50;	//거리 기준값
+	var temp_threshold = 33;		//온도 기준값
+	var bright_threshold = 200; //150;		//밝기 기준값
 	
-	var tmp_img = "capture/default.jpg";				//이미지 임시값
 	var img_address = "capture/default.jpg";
-	
-//----------------------------------------- graph Related Variables---------------------------------------//
 
-	var color_temp = d3.scale.category10();
-	color_temp.domain(['Sensor_temp']);
-	var temp_obj = {
-		id : 'temp',
-		_color : color_temp,
-		_series : color_temp.domain().map(function(name){
-			return {
-				name : 'Sensor_temp',
-				values : data_temp
-			};
-		}),
-		_x : null,
-		_y : null,
-		_line : null,
-		_graph : null,
-		_xAxis : null,
-		_yAxis : null,
-		_ld : null,
-		_path : null,
-		
-		width : document.getElementById("graph_temp").clientWidth,
-		height : document.getElementById("graph_temp").clientHeight
+// To-Do : 
+function applyRule() {
+}
 
-	};
-	
-	///////////////////////////////////////////////////
-	var color_distance = d3.scale.category10();
-	color_distance.domain(['Sensor_distance']);
-	var distance_obj = {
-		id : 'distance',
-		_color : color_distance,
-		_series : color_distance.domain().map(function(name){
-			return {
-				name : 'Sensor_distance',
-				values : data_distance
-			};
-		}),
-		_x : null,
-		_y : null,
-		_line : null,
-		_graph : null,
-		_xAxis : null,
-		_yAxis : null,
-		_ld : null,
-		_path : null,
-		width : document.getElementById("graph_distance").clientWidth,
-		height : document.getElementById("graph_distance").clientHeight
-		
-	};
-	///////////////////////////////////////////////////
-	var color_lux = d3.scale.category10();
-	color_lux.domain(['Sensor_lux']);
-	var lux_obj = {
-		id : 'lux',
-		_color : color_lux,
-		_series : color_lux.domain().map(function(name){
-			return {
-				name : 'Sensor_lux',
-				values : data_lux
-			};
-		}),
-		_x : null,
-		_y : null,
-		_line : null,
-		_graph : null,
-		_xAxis : null,
-		_yAxis : null,
-		_ld : null,
-		_path : null,
-		width : document.getElementById("graph_lux").clientWidth,
-		height : document.getElementById("graph_lux").clientHeight
+function initRickShaw() {
+// 3 Kinds of Graphs are rendered with ajas call
+// STEP1-1. Temperature Graph
+	var graph_temp = new Rickshaw.Graph( {
+		element: document.querySelector("#chart_temp"),
+		width: document.getElementById("chart_temp").clientWidth,
+		height: document.getElementById("chart_temp").clientHeight,
+		renderer: 'line',
+		series: new Rickshaw.Series.FixedDuration([{ name: 'temp' }], undefined, {
+			timeInterval: 1000,
+			maxDataPoints: 100,
+			timeBase: new Date().getTime() / 1000
+		}) 
+	});
+	var xAxis = new Rickshaw.Graph.Axis.Time({
+		graph:graph_temp
+	});
+	var yAxis = new Rickshaw.Graph.Axis.Y({
+	    graph: graph_temp,
+	    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
+	});
+	graph_temp.render();
+// STEP1-2. Distance Graph
+	var graph_dist = new Rickshaw.Graph( {
+		element: document.querySelector("#chart_dist"),
+		width: document.getElementById("chart_dist").clientWidth,
+		height: document.getElementById("chart_dist").clientHeight,
+		renderer: 'line',
+		series: new Rickshaw.Series.FixedDuration([{ name: 'dist' }], undefined, {
+			timeInterval: 1000,
+			maxDataPoints: 100,
+			timeBase: new Date().getTime() / 1000
+		}) 
+	});
+	var xAxis = new Rickshaw.Graph.Axis.Time({
+		graph:graph_dist
+	});
+	var yAxis = new Rickshaw.Graph.Axis.Y({
+	    graph: graph_dist,
+	    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
+	});
+	graph_dist.render();
+// STEP1-3 . light Graph
+	var graph_light = new Rickshaw.Graph( {
+		element: document.querySelector("#chart_light"),
+		width: document.getElementById("chart_light").clientWidth,
+		height: document.getElementById("chart_light").clientHeight,
+		renderer: 'line',
+		series: new Rickshaw.Series.FixedDuration([{ name: 'light' }], undefined, {
+			timeInterval: 1000,
+			maxDataPoints: 100,
+			timeBase: new Date().getTime() / 1000
+		}) 
+	});
+	var xAxis = new Rickshaw.Graph.Axis.Time({
+		graph:graph_light
+	});
+	var yAxis = new Rickshaw.Graph.Axis.Y({
+	    graph: graph_light,
+	    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
+	});
+	graph_light.render();
+	// Init NodeID from config
+	getConfig( function(err,config) {
+		$('#NodeID')[0].innerText = config.nodeID;
+	});
 
+	var timeInterval = 1000;
+	var iv = setInterval( function() {
+		getData(container_name, function(err,time,data_prim, gwl, geui){
+			//Distance, Bright, Temp 확인
+			
+			var valueLux = data_prim.substring(46,50); //data_prim.split(delimiter[nodeIndex])[2];
+			valueLux = parseInt(valueLux, 16);
+
+			var valueTemp = data_prim.substring(24,28); //data_prim.split(delimiter[nodeIndex])[0];
+			valueTemp = parseInt(valueTemp, 16);
+			valueTemp = Math.round(valueTemp/100);
+
+			var valueHumid = data_prim.substring(40,42); //lesmin battery = Gyro Z
+			valueHumid = parseInt(valueHumid, 16);
+			
+			var valueDistance = data_prim.substring(32,36);//어느부분인지 확인해야함
+			valueDistance = parseInt(valueDistance, 16);
+			
+			// update render
+			var data_temp = { temp: valueTemp };
+			graph_temp.series.addData(data_temp);
+			graph_temp.render();
+			var data_dist = { temp: valueDistance };
+			graph_dist.series.addData(data_dist);
+			graph_dist.render();
+			var data_light = { temp: valueLux };
+			graph_light.series.addData(data_light);
+			graph_light.render();
+			$('#temp_value')[0].innerText = valueTemp;
+			$('#distance_value')[0].innerText = valueDistance;
+			$('#lux_value')[0].innerText = valueLux;
+
+			// Insert Node ID and show Image
+			document.getElementById("data_img").src = "/"+img_address;
+
+			///////////////////////////////////////////////////////////////////////////
+			// Rule Engine
+			if(valueDistance < distance_threshold ){
+				if(!DISTANCE_FLAG){
+					$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
+						toastr.warning('Take Photo');
+					});
+					DISTANCE_FLAG = true;	
+				}
+			}
+			else{
+				DISTANCE_FLAG = false;
+			}
 		
-	};
-	/* end of graph Related Variables */
+			
+			if(valueLux < bright_threshold){
+				if(!LED_GREEN){
+					$.post('/control', {cmt:'LEDControl',cmd:'G1'}, function(data,status){
+						toastr.success('Turn On Lights');
+					});
+					LED_GREEN = true;
+				}
+			}
+			else {
+				if(LED_GREEN){
+					$.post('/control', {cmt:'LEDControl',cmd:'G0'}, function(data,status){
+						toastr.success('Turn Off Lights');
+					});
+					LED_GREEN = false;
+				}
+			}
+			
+			if(valueTemp > temp_threshold){
+				if(!LED_RED){
+					$.post('/control', {cmt:'LEDControl',cmd:'R1'}, function(data,status){
+						toastr.error('Emergency');
+					});
+					LED_RED = true;
+				}	
+			}
+			else {
+				if(LED_RED){
+					$.post('/control', {cmt:'LEDControl',cmd:'R0'}, function(data,status){
+						toastr.error('Emergency');
+					});
+					LED_RED = false;
+				}	
+			}
+			// End of Rule Engine
+			///////////////////////////////////////////////////////////////////////////
+		});
+	}, timeInterval );
+}
+initRickShaw();
+
 //=============================================================================================================================//
 
 //--------------------------------nodeID 및 Firmware Version 초기화---------------------------------------------------------------//
@@ -168,7 +231,6 @@ jQuery(document).ready(function() {
 			nodeIndex=i;
 			getConfig( function(err,config) {
 				nodeID.push(config.nodeID);	
-				Firm_Ver.push('0.1.0');
 				delimiter.push(config.delimiter);
 			});
 		}
@@ -269,89 +331,6 @@ jQuery(document).ready(function() {
 	}
 //=============================================================================================================================//
 
-//-----------------------------------------------------그래프 초기화 및 생성-------------------------------------------------------//
-
-	function creategraph(obj) {
-		obj._color.domain("Sensor_"+obj.id);
-		
-		
-		var width;
-		var height;
-		
-
-		var margin = {top: 10, right: 30, bottom: 20, left: 10};
-
-		width = obj.width - margin.left - margin.right;
-		height = obj.height - margin.top - margin.bottom;
-
-		// create the graph_temp object
-		obj._graph = d3.select("#graph_"+obj.id).append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
-		.append("g")
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		obj._x = d3.scale.linear()
-		.domain([0, MAX_DATA])
-		.range([width, 0]);
-		obj._y = d3.scale.linear()
-		.domain([
-		d3.min(obj._series, function(l) { return d3.min(l.values, function(v) { return v*0.75; }); }),
-		d3.max(obj._series, function(l) { return d3.max(l.values, function(v) { return v*1.25; }); })
-		])
-		.range([height, 0]);
-		//add the axes labels
-		obj._graph.append("text")
-		.attr("class", "axis-label")
-		.style("text-anchor", "end")
-		.attr("x_"+obj.id, 100)
-		.attr("y_"+obj.id, height)
-
-
-
-		obj._line = d3.svg.line()
-		.x(function(d, i) { return obj._x(i); })
-		.y(function(d) { return obj._y(d); });
-
-		obj._xAxis = obj._graph.append("g")
-		.attr("class", "x_"+obj.id+" axis")
-		.attr("transform", "translate(0," + height + ")")
-		.call(d3.svg.axis().scale(obj._x).orient("bottom"));
-
-		obj._yAxis = obj._graph.append("g")
-		.attr("class", "y_"+obj.id+" axis")
-		.attr("transform", "translate(" + width + ",0)")
-		.call(d3.svg.axis().scale(obj._y).orient("right"));
-
-		obj._ld = obj._graph.selectAll(".series_"+obj.id)
-		.data(obj._series)
-		.enter().append("g")
-		.attr("class", "series_"+obj.id);
-
-		// display the line by appending an svg:path element with the data line we created above
-		obj._path = obj._ld.append("path")
-		.attr("class", "line")
-		.attr("d", function(d) { return obj._line(d.values); })
-		.style("stroke", function(d) { return obj._color(d.name); });
-		
-	}
-
-	function updategraph(obj) {
-		// static update without animation
-		obj._y.domain([
-		d3.min(obj._series, function(l) { return d3.min(l.values, function(v) { return v*0.75; }); }),
-		d3.max(obj._series, function(l) { return d3.max(l.values, function(v) { return v*1.25; }); })
-		]);
-		obj._yAxis.call(d3.svg.axis().scale(obj._y).orient("right"));
-
-		obj._path
-		.attr("d", function(d) { return obj._line(d.values); })
-	}
-	
-	creategraph(temp_obj);
-	creategraph(distance_obj);
-	creategraph(lux_obj);
-//=============================================================================================================================//
 
 //-----------------------------------------------------container로부터 받은 데이터 처리-------------------------------------------------------//
 
@@ -400,14 +379,6 @@ jQuery(document).ready(function() {
 	
 	
 
-	function insertData(dest, value, name){
-		if(dest.length == MAX_DATA){
-			dest.pop();
-		}
-		dest.splice(0,0,value);
-		$(name)[0].innerText = dest[0];
-		
-	}  
 //=============================================================================================================================//
 function getPhoto(cb) {
 		var url = '/image';
@@ -415,6 +386,7 @@ function getPhoto(cb) {
 		$.get(url, function(data, status){
 			if(status == 'success'){		
 				var img_addr = data.con;
+				//console.log("getPhoto():img_addr="+img_addr); //lesmin
 				cb(null, img_addr);
 			}
 			else {
@@ -455,150 +427,19 @@ function getPhoto(cb) {
 			container_name = config.containerName;
 		}
 	});
-	var LED_RED = "false";
-	var LED_GREEN = "false";
-	var DISTANCE_FLAG = "false";
+	var LED_RED = false;
+	var LED_GREEN = false;
+	var DISTANCE_FLAG = false;
 
 	setInterval(function(){
 		getPhoto(function(err, img_addr){
-			if(img_address != img_addr){
-				tmp_img = img_addr;
-			}
+			console.log(img_address +"_______" +img_addr);
+			img_address = img_addr; //lesmin test
 		});
 	}, period*1000);
 
 
-	setInterval(function(){
-		getData(container_name, function(err,time,data_prim, gwl, geui){
-			
-			
-			
-			var valueLux = data_prim.substring(46,50); //data_prim.split(delimiter[nodeIndex])[2];
-			//alert(valueLux);
-			//console.log('[Error] lux substring:' + valueLux); //lesmin
-			valueLux = parseInt(valueLux, 16);
-			//console.log('[Error] lux Hex-to-Dec:' + valueLux); //lesmin
-			//valueLux = Math.round(valueLux);
-			//valueLux = Math.round((1050 - valueLux)/2);
-
-			var valueTemp = data_prim.substring(24,28); //data_prim.split(delimiter[nodeIndex])[0];
-			//console.log('[Error] temp substring:' + valueTemp); //lesmin
-			valueTemp = parseInt(valueTemp, 16);
-			//console.log('[Error] temp Hex-to-Dec:' + valueTemp); //lesmin
-			valueTemp = Math.round(valueTemp/100);
-			//console.log('[Error] temp toFloat:' + valueTemp); //lesmin
-
-
-			//var valueHumid = data_prim.substring(46,48); //data_prim.split(delimiter[nodeIndex])[1];
-			var valueHumid = data_prim.substring(40,42); //lesmin battery = Gyro Z
-			//console.log('[Error] Humid substring:' + valueHumid); //lesmin
-			valueHumid = parseInt(valueHumid, 16);
-			//console.log('[Error] Humid Hex-to-Dec:' + valueHumid); //lesmin
-			//valueHumid = valueHumid -30; //2.54;			
-				
-			
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			////////////////Distance, Bright, Temp 확인////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			
-			var valueDistance = data_prim.substring(32,36);//어느부분인지 확인해야함
-			valueDistance = parseInt(valueDistance, 16);
-			//alert(valueDistance);
-			
-			img_address = tmp_img;
-
-			//if(valueDistance < distance_threshold && tmp_img != img_address){
-			//console.log("##"+valueDistance+" < "+distance_threshold+" d_flag="+DISTANCE_FLAG);
-			if(valueDistance < distance_threshold ){
-				if(DISTANCE_FLAG == "false"){
-					DISTANCE_FLAG = "true";	
-			//		console.log("under distance : " + CAMERA_FLAG);
-			//		if(CAMERA_FLAG == "false"){
-						//img_address = tmp_img;
-						$.post('/control', {cmt:'TakePhoto',cmd:'request'}, function(data,status){
-							toastr.warning('Take Photo');
-						});
-			//			CAMERA_FLAG = "true";
-			//		}
-				}
-			}
-			else{
-
-			//	console.log("over distance : " + CAMERA_FLAG);
-				//CAMERA_FLAG = "false";
-				DISTANCE_FLAG = "false";
-			}
 		
-			
-			if(valueLux < bright_threshold){
-				if(LED_GREEN == "false" ){
-					$.post('/control', {cmt:'LEDControl',cmd:'G1'}, function(data,status){
-						toastr.success('Turn On Lights');
-					});
-					LED_GREEN = "true";
-				}
-			}
-			else if(LED_GREEN == "true"){//(valueLux >= bright_threshold )
-				$.post('/control', {cmt:'LEDControl',cmd:'G0'}, function(data,status){
-					toastr.success('Turn Off Lights');
-				});
-				LED_GREEN = "false";
-			}
-			
-			if(valueTemp > temp_threshold){
-				if(LED_RED == "false"){
-					$.post('/control', {cmt:'LEDControl',cmd:'R1'}, function(data,status){
-						toastr.error('Emergency');
-					});
-					LED_RED = "true";
-				}	
-			}
-			else if(LED_RED == "true"){//(valueTemp <= temp_threshold )
-				$.post('/control', {cmt:'LEDControl',cmd:'R0'}, function(data,status){
-					toastr.error('Emergency');
-				});
-				LED_RED = "false";
-			}
-						
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-			
-			insertData(data_temp,valueTemp, '#temp_value');
-			insertData(data_distance,valueDistance, '#distance_value');
-			insertData(data_lux,valueLux, '#lux_value');
-
-		});
-		
-		insertData(Data_NodeID,nodeID[nodeIndex], '#NodeID');
-		
-		//document.getElementById("data_img").src = img_address;
-		//$("#data_img").attr("src", "file://"+tmp_img);
-		
-		//alert(tmp_img);
-		//Distance 정해지는 경우 
-		//console.log(img_address); //lesmin
-		document.getElementById("data_img").src = "/"+img_address;
-		//document.getElementById("data_img").src = "http://192.168.15.2:8888/"+img_address;
-		
-		
-		updategraph(temp_obj);
-		updategraph(distance_obj);
-		updategraph(lux_obj);
-
-//=============================================================================================================================//
-
-//-------------------------------------Trigger 설정한 경우 처리---------------------------------------//
-
-		
-	}, period*1000);
 
 //=============================================================================================================================//
 
@@ -612,6 +453,7 @@ function getPhoto(cb) {
 //-------------------------------------TakePhoto 버튼 클릭---------------------------------------//
 
 	$('#TakePhoto').on('click', function(event) {
+			//toastr.warning('Take Photo');
 		$.post('/control', {cmt:'TakePhoto', cmd:'request'}, function(data, status){
 			toastr.warning('Take Photo Done');
 		});
