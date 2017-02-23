@@ -40,8 +40,7 @@ process.on('uncaughtException', function(err) {
 }); //lesmin debug
 
 app.set('port', process.env.PORT || 3000);
-app.use('/dashboard', express.static(path.join(__dirname,'public')));
-app.use('/capture', express.static(path.join(__dirname,'public/capture')));
+app.use('/', express.static(path.join(__dirname,'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
