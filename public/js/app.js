@@ -18,12 +18,11 @@
 "use strict";
 
 jQuery(document).ready(function() {
-	var data = [0];					// 디바이스의 Raw Data 확인	
 	
 	var numOfDevice = 1;			// 웹페이지에서 확인할 디바이스의 갯수 (config.js의 갯수)
 	var nodeIndex=0;				// 현재 출력되는 (config-1) 정보 ex) nodeIndex =0 -> config_1 정보	
-	var period = 1;					// getLatestData 주기 sec (RepPerChange 명령에 의해 변경)
 	var container_name = 'LoRa';	// 생성한 container의 이름 (config.js 수정)
+	var tv = 1000;	// Interval 주기
 
 	var nodeID = [];				// LTID 정보 저장
 	var delimiter = [];				// 디바이스에서 전달되는 <con> 데이터의 구분자 (config.js 수정)
@@ -47,88 +46,57 @@ jQuery(document).ready(function() {
 	var temp_threshold = 33;		//온도 기준값
 	var bright_threshold = 200; //150;		//밝기 기준값
 	
-	var img_address = "capture/default.jpg";
-
-// To-Do : 
-function applyRule() {
-}
-
-function initRickShaw() {
-// 3 Kinds of Graphs are rendered with ajas call
-// STEP1-1. Temperature Graph
-	var graph_temp = new Rickshaw.Graph( {
-		element: document.querySelector("#chart_temp"),
-		width: document.getElementById("chart_temp").clientWidth,
-		height: document.getElementById("chart_temp").clientHeight,
-		renderer: 'line',
-		series: new Rickshaw.Series.FixedDuration([{ name: 'temp' }], undefined, {
-			timeInterval: 1000,
-			maxDataPoints: 100,
-			timeBase: new Date().getTime() / 1000
-		}) 
-	});
-	var xAxis = new Rickshaw.Graph.Axis.Time({
-		graph:graph_temp
-	});
-	var yAxis = new Rickshaw.Graph.Axis.Y({
-	    graph: graph_temp,
-	    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
-	});
-	graph_temp.render();
-// STEP1-2. Distance Graph
-	var graph_dist = new Rickshaw.Graph( {
-		element: document.querySelector("#chart_dist"),
-		width: document.getElementById("chart_dist").clientWidth,
-		height: document.getElementById("chart_dist").clientHeight,
-		renderer: 'line',
-		series: new Rickshaw.Series.FixedDuration([{ name: 'dist' }], undefined, {
-			timeInterval: 1000,
-			maxDataPoints: 100,
-			timeBase: new Date().getTime() / 1000
-		}) 
-	});
-	var xAxis = new Rickshaw.Graph.Axis.Time({
-		graph:graph_dist
-	});
-	var yAxis = new Rickshaw.Graph.Axis.Y({
-	    graph: graph_dist,
-	    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
-	});
-	graph_dist.render();
-// STEP1-3 . light Graph
-	var graph_light = new Rickshaw.Graph( {
-		element: document.querySelector("#chart_light"),
-		width: document.getElementById("chart_light").clientWidth,
-		height: document.getElementById("chart_light").clientHeight,
-		renderer: 'line',
-		series: new Rickshaw.Series.FixedDuration([{ name: 'light' }], undefined, {
-			timeInterval: 1000,
-			maxDataPoints: 100,
-			timeBase: new Date().getTime() / 1000
-		}) 
-	});
-	var xAxis = new Rickshaw.Graph.Axis.Time({
-		graph:graph_light
-	});
-	var yAxis = new Rickshaw.Graph.Axis.Y({
-	    graph: graph_light,
-	    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
-	});
-	graph_light.render();
+	var palette = new Rickshaw.Color.Palette( { scheme: 'classic9' } );
+	var graph_temp = createGraph('temp'); 
+	var graph_dist = createGraph('dist'); 
+	var graph_light = createGraph('light'); 
 	// Init NodeID from config
 	getConfig( function(err,config) {
 		$('#NodeID')[0].innerText = config.nodeID;
 	});
 
-	var timeInterval = 1000;
+// To-Do : 
+function applyRule() {
+}
+
+function createGraph(key) {
+	var graph = new Rickshaw.Graph( {
+		element: $('#chart_'+key)[0],
+		width: $('#chart_'+key)[0].clientWidth,
+		height: $('#chart_'+key)[0].clientHeight,
+		renderer: 'line',
+		series: new Rickshaw.Series.FixedDuration([{ name: key }], undefined, {
+			color : palette.color(),
+			timeInterval: tv,
+			maxDataPoints: 100,
+			timeBase: new Date().getTime() / 1000
+		}) 
+	});
+	graph.render();
+	var xAxis = new Rickshaw.Graph.Axis.Time({
+		graph:graph
+	});
+	var yAxis = new Rickshaw.Graph.Axis.Y({
+	    graph: graph,
+	    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
+	});
+	var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+	    graph: graph
+	});
+	return graph;
+}
+
+function initRickShaw() {
+
 	var iv = setInterval( function() {
 		getData(container_name, function(err,time,data_prim, gwl, geui){
 			//Distance, Bright, Temp 확인
+			//console.log('Recv raw data :' + data_prim);
 			
-			var valueLux = data_prim.substring(46,50); //data_prim.split(delimiter[nodeIndex])[2];
+			var valueLux = data_prim.substring(46,50);
 			valueLux = parseInt(valueLux, 16);
 
-			var valueTemp = data_prim.substring(24,28); //data_prim.split(delimiter[nodeIndex])[0];
+			var valueTemp = data_prim.substring(24,28);
 			valueTemp = parseInt(valueTemp, 16);
 			valueTemp = Math.round(valueTemp/100);
 
@@ -141,19 +109,24 @@ function initRickShaw() {
 			// update render
 			var data_temp = { temp: valueTemp };
 			graph_temp.series.addData(data_temp);
-			graph_temp.render();
-			var data_dist = { temp: valueDistance };
+			graph_temp.update();
+			var data_dist = { dist: valueDistance };
 			graph_dist.series.addData(data_dist);
-			graph_dist.render();
-			var data_light = { temp: valueLux };
+			graph_dist.update();
+			var data_light = { light: valueLux };
 			graph_light.series.addData(data_light);
-			graph_light.render();
+			graph_light.update();
+			// update Text
 			$('#temp_value')[0].innerText = valueTemp;
 			$('#distance_value')[0].innerText = valueDistance;
 			$('#lux_value')[0].innerText = valueLux;
 
 			// Insert Node ID and show Image
-			document.getElementById("data_img").src = "/"+img_address;
+			// update Photo URL
+			getPhoto(function(err, img_addr){
+				//console.log("Image Path :" +img_addr);
+				$("#data_img")[0].src = "/"+img_addr;
+			});
 
 			///////////////////////////////////////////////////////////////////////////
 			// Rule Engine
@@ -206,7 +179,7 @@ function initRickShaw() {
 			// End of Rule Engine
 			///////////////////////////////////////////////////////////////////////////
 		});
-	}, timeInterval );
+	}, tv );
 }
 initRickShaw();
 
@@ -423,31 +396,20 @@ function getPhoto(cb) {
 //-------------------------------------주기적으로 조회된 최신 데이터 처리---------------------------------------//
 		
 	getConfig( function(err,config) {
-		if(data){ 
-			container_name = config.containerName;
-		}
+		if(err) return console.error(err);
+		else container_name = config.containerName;
 	});
 	var LED_RED = false;
 	var LED_GREEN = false;
 	var DISTANCE_FLAG = false;
 
-	setInterval(function(){
-		getPhoto(function(err, img_addr){
-			console.log(img_address +"_______" +img_addr);
-			img_address = img_addr; //lesmin test
-		});
-	}, period*1000);
-
-
-		
-
 //=============================================================================================================================//
-
+/*
 	var mapInterval = setTimeout(
 	function(){
 		initMap();
 	}, 500);
-	
+*/	
 //=============================================================================================================================//
 
 //-------------------------------------TakePhoto 버튼 클릭---------------------------------------//
