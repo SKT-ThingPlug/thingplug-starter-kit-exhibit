@@ -11,7 +11,7 @@
 #define _CONFIGURATION_H_
 
 
-#define MQTT_HOST                           "thingplugtest.sktiot.com"
+#define MQTT_HOST                           "mqtt.sktiot.com"
 #define MQTT_PORT                           1883
 #define MQTT_SECURE_PORT                    8883
 #define MQTT_KEEP_ALIVE                     300
