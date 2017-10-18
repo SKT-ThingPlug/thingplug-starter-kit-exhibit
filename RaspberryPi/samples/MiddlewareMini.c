@@ -15,6 +15,7 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #include "oneM2M.h"
 #include "oneM2M_V1.h"
@@ -28,7 +29,7 @@
 #define TO_MGMTCMD                          "%s/mgmtCmd-%s"
 #define TO_MGMTCMDRESULT                    "%s/mgmtCmd-%s_%s/execInstance-%s"
 
-#define TOPIC_SUBSCRIBE_REQ                 "/oneM2M/req/+/%s"
+#define TOPIC_SUBSCRIBE_REQ                 "/oneM2M/req_msg/+/%s"
 #define TOPIC_SUBSCRIBE_RES                 "/oneM2M/resp/%s/+"
 #define TOPIC_SUBSCRIBE_SIZE                2
 #define TOPIC_PUBLISH                       "/oneM2M/req/%s/%s"
@@ -94,6 +95,31 @@ char* timeToString(struct tm *t) {
 			t->tm_hour, t->tm_min, t->tm_sec );
 	return s;
 }
+
+int getIPAddress(char *ip_addr)
+{
+	int sock;
+	struct ifreq ifr;
+	struct sockaddr_in *sin;
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock < 0) 
+	{
+		return 0;
+	}
+	strcpy(ifr.ifr_name, "eth0");
+	if (ioctl(sock, SIOCGIFADDR, &ifr)< 0)    
+	{
+		close(sock);
+		return 0;
+
+	}
+	sin = (struct sockaddr_in*)&ifr.ifr_addr;
+	strcpy(ip_addr, inet_ntoa(sin->sin_addr));
+
+	close(sock);
+	return 1;
+}
+
 
 /**
  * @brief do verification step
@@ -344,12 +370,12 @@ static void ProcessCMD(char* payload, int payloadLen) {
 
 		
 		int resourceType;
-		int operation;
-		char to[512] = "";
+			int operation;
+			char to[512] = "";
 			//char buffer[128] = "";
 			//char* ri = ONEM2M_RI;
 			//char* fr = NULL;
-		void* pc = NULL;
+			void* pc = NULL;
 
 		
 		resourceType = contentInstance;
@@ -379,16 +405,17 @@ static void ProcessCMD(char* payload, int payloadLen) {
     }
 }
 void MQTTConnected(int result) {
-    SKTDebugPrint(LOG_LEVEL_INFO, "MQTTConnected result : %d", result);
-	if(result < 0) {
-		mIsDisconnected = 1;
-	}
+    SKTDebugPrint(LOG_LEVEL_INFO, "MQTTConnected result : %d", result);    
+    if(result != 0) {
+	sleep(5);
+	mIsDisconnected = 1;
+    }
 }
 
 void MQTTSubscribed(int result) {
     SKTDebugPrint(LOG_LEVEL_INFO, "MQTTSubscribed result : %d", result);
     if(mStep != VERIFICATION_CONTENTINSTANCE_CREATE) {
-      DoVerificationStep();
+    DoVerificationStep();
     }
 }
 
@@ -554,6 +581,12 @@ char* GetMacAddressWithoutColon() {
 int main(int argc, char **argv) {
     SKTDebugInit(1, LOG_LEVEL_INFO, NULL);
     int rc;
+// check ip address before begins
+    char ip_addr[64];
+    while( getIPAddress(ip_addr) != 1) {
+        printf("getIPAddress failed!\n");
+	sleep(5);
+    }
 
     // set callbacks
     rc = tpMQTTSetCallbacks(MQTTConnected, MQTTSubscribed, MQTTDisconnected, MQTTConnectionLost, MQTTMessageDelivered, MQTTMessageArrived);
