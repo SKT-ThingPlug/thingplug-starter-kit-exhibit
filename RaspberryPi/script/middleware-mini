@@ -1,0 +1,61 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          middleware-mini 
+# Required-Start:    
+# Required-Stop:     
+# Default-Start:     S
+# Default-Stop:      0 1 6
+# Short-Description: just for raspberry cam test only
+# Description:       thingplug is a popular iot platform as skt's asset 
+### END INIT INFO
+. /lib/lsb/init-functions
+
+# Change path of the script 
+NAME="middleware-mini"
+DESC="ThingPlug MiddlewareMini"
+PID_FILE="/var/run/middleware-mini.pid"
+EXE_FILE="exec /usr/sbin/MiddlewareMini > /dev/null 2>&1"
+OPTS="--make-pidfile --remove-pidfile"
+SCRIPT="/home/pi/mihosang/thingplug-starter-kit-exhibit/application_web.js"
+
+case "$1" in
+  start)
+	echo -n "Starting daemon : $NAME"
+	log_daemon_msg "Starting $DESC $NAME"
+	forever start --silent $SCRIPT
+	start-stop-daemon --start $OPTS --startas /bin/sh --pidfile $PID_FILE\
+		--background -- -c "exec /usr/sbin/MiddlewareMini > /tmp/test.log 2>&1"
+	RET=$?
+	if [ $RET != 0 ]; then
+	    echo $RET
+            exit $RET
+	fi
+	;;
+
+  stop)
+	echo -n "Stopping daemon : $NAME"
+	log_daemon_msg "Stopping $DESC $NAME"
+	start-stop-daemon --stop --oknodo --quiet --pidfile $PID_FILE
+	echo "."
+	forever stopall
+	;;
+
+  status)
+	echo "all daemons running"
+	exit 0
+	;;
+
+  restart | force-reload)
+	$0 stop
+	sleep 1
+	$0 start
+	;;
+
+  *)
+	echo "Usage: middleware-mini {start|stop|status|restart}"
+	exit 1
+	;;
+esac
+
+exit 0
